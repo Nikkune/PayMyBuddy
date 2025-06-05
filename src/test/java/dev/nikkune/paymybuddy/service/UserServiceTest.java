@@ -41,6 +41,7 @@ class UserServiceTest {
         testUser.setUsername("testuser");
         testUser.setEmail("test@example.com");
         testUser.setPassword("encodedPassword");
+        testUser.setBalance(500.0); // Initialize balance
         testUser.setConnections(new ArrayList<>());
 
         // Create a connection user
@@ -49,6 +50,7 @@ class UserServiceTest {
         connectionUser.setUsername("connection");
         connectionUser.setEmail("connection@example.com");
         connectionUser.setPassword("encodedPassword");
+        connectionUser.setBalance(500.0); // Initialize balance
         connectionUser.setConnections(new ArrayList<>());
     }
 
@@ -64,32 +66,6 @@ class UserServiceTest {
         // Assert
         assertEquals(expectedUsers, actualUsers);
         verify(userRepository).findAll();
-    }
-
-    @Test
-    void exists_WithExistingId_ShouldReturnUser() {
-        // Arrange
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-
-        // Act
-        User result = userService.exists(testUser.getId());
-
-        // Assert
-        assertEquals(testUser, result);
-        verify(userRepository).findById(testUser.getId());
-    }
-
-    @Test
-    void exists_WithNonExistingId_ShouldReturnNull() {
-        // Arrange
-        when(userRepository.findById(999)).thenReturn(Optional.empty());
-
-        // Act
-        User result = userService.exists(999);
-
-        // Assert
-        assertNull(result);
-        verify(userRepository).findById(999);
     }
 
     @Test
@@ -161,6 +137,7 @@ class UserServiceTest {
         newUser.setUsername("newuser");
         newUser.setEmail("new@example.com");
         newUser.setPassword("password123");
+        newUser.setBalance(0.0); // Initialize balance
         when(userRepository.save(any(User.class))).thenReturn(newUser);
 
         // Act
@@ -170,6 +147,7 @@ class UserServiceTest {
         assertEquals(newUser.getUsername(), result.getUsername());
         assertEquals(newUser.getEmail(), result.getEmail());
         assertEquals(newUser.getPassword(), result.getPassword());
+        assertEquals(0.0, result.getBalance(), "Balance should be initialized to 0.0");
         verify(userRepository).save(any(User.class));
     }
 
@@ -366,7 +344,7 @@ class UserServiceTest {
         when(userRepository.findById(connectionUser.getId())).thenReturn(Optional.of(connectionUser));
 
         // Act
-        List<User> result = userService.addConnections(testUser.getId(), connectionUser.getId());
+        List<User> result = userService.addConnection(testUser.getId(), connectionUser.getId());
 
         // Assert
         assertEquals(1, result.size());
@@ -376,7 +354,7 @@ class UserServiceTest {
     }
 
     @Test
-    void addConnections_WithExistingConnection_ShouldThrowException() {
+    void addConnection_WithExistingConnection_ShouldThrowException() {
         // Arrange
         testUser.getConnections().add(connectionUser);
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
@@ -384,7 +362,7 @@ class UserServiceTest {
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> userService.addConnections(testUser.getId(), connectionUser.getId()));
+            () -> userService.addConnection(testUser.getId(), connectionUser.getId()));
         assertEquals("User is already connected to this user", exception.getMessage());
         verify(userRepository).findById(testUser.getId());
         verify(userRepository).findById(connectionUser.getId());
@@ -398,7 +376,7 @@ class UserServiceTest {
         when(userRepository.findById(connectionUser.getId())).thenReturn(Optional.of(connectionUser));
 
         // Act
-        List<User> result = userService.removeConnections(testUser.getId(), connectionUser.getId());
+        List<User> result = userService.removeConnection(testUser.getId(), connectionUser.getId());
 
         // Assert
         assertEquals(0, result.size());
@@ -407,14 +385,14 @@ class UserServiceTest {
     }
 
     @Test
-    void removeConnections_WithNonExistingConnection_ShouldThrowException() {
+    void removeConnection_WithNonExistingConnection_ShouldThrowException() {
         // Arrange
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         when(userRepository.findById(connectionUser.getId())).thenReturn(Optional.of(connectionUser));
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> userService.removeConnections(testUser.getId(), connectionUser.getId()));
+            () -> userService.removeConnection(testUser.getId(), connectionUser.getId()));
         assertEquals("User is not connected to this user", exception.getMessage());
         verify(userRepository).findById(testUser.getId());
         verify(userRepository).findById(connectionUser.getId());

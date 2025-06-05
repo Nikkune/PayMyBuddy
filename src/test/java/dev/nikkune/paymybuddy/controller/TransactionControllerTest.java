@@ -60,6 +60,7 @@ class TransactionControllerTest {
         sender.setUsername("sender");
         sender.setEmail("sender@example.com");
         sender.setPassword("password123");
+        sender.setBalance(500.0);
         sender.setConnections(new ArrayList<>());
 
         // Create receiver user
@@ -68,6 +69,7 @@ class TransactionControllerTest {
         receiver.setUsername("receiver");
         receiver.setEmail("receiver@example.com");
         receiver.setPassword("password123");
+        receiver.setBalance(500.0);
         receiver.setConnections(new ArrayList<>());
 
         // Create transaction
@@ -80,10 +82,7 @@ class TransactionControllerTest {
 
         // Create transaction DTO
         transactionDTO = new TransactionDTO();
-        transactionDTO.setId(1);
-        transactionDTO.setSenderId(sender.getId());
         transactionDTO.setSenderUsername(sender.getUsername());
-        transactionDTO.setReceiverId(receiver.getId());
         transactionDTO.setReceiverUsername(receiver.getUsername());
         transactionDTO.setDescription("Test transaction");
         transactionDTO.setAmount(100.0);
@@ -110,10 +109,7 @@ class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(transactionDTO.getId())))
-                .andExpect(jsonPath("$[0].senderId", is(transactionDTO.getSenderId())))
                 .andExpect(jsonPath("$[0].senderUsername", is(transactionDTO.getSenderUsername())))
-                .andExpect(jsonPath("$[0].receiverId", is(transactionDTO.getReceiverId())))
                 .andExpect(jsonPath("$[0].receiverUsername", is(transactionDTO.getReceiverUsername())))
                 .andExpect(jsonPath("$[0].description", is(transactionDTO.getDescription())))
                 .andExpect(jsonPath("$[0].amount", is(transactionDTO.getAmount())));
@@ -133,10 +129,7 @@ class TransactionControllerTest {
                         .param("transactionId", String.valueOf(transaction.getId())))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(transactionDTO.getId())))
-                .andExpect(jsonPath("$.senderId", is(transactionDTO.getSenderId())))
                 .andExpect(jsonPath("$.senderUsername", is(transactionDTO.getSenderUsername())))
-                .andExpect(jsonPath("$.receiverId", is(transactionDTO.getReceiverId())))
                 .andExpect(jsonPath("$.receiverUsername", is(transactionDTO.getReceiverUsername())))
                 .andExpect(jsonPath("$.description", is(transactionDTO.getDescription())))
                 .andExpect(jsonPath("$.amount", is(transactionDTO.getAmount())));
@@ -155,10 +148,7 @@ class TransactionControllerTest {
                         .param("transactionId", "999"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(0)))
-                .andExpect(jsonPath("$.senderId", is(0)))
                 .andExpect(jsonPath("$.senderUsername", is(nullValue())))
-                .andExpect(jsonPath("$.receiverId", is(0)))
                 .andExpect(jsonPath("$.receiverUsername", is(nullValue())))
                 .andExpect(jsonPath("$.description", is(nullValue())))
                 .andExpect(jsonPath("$.amount", is(0.0)));
@@ -182,10 +172,7 @@ class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(transactionDTO.getId())))
-                .andExpect(jsonPath("$[0].senderId", is(transactionDTO.getSenderId())))
                 .andExpect(jsonPath("$[0].senderUsername", is(transactionDTO.getSenderUsername())))
-                .andExpect(jsonPath("$[0].receiverId", is(transactionDTO.getReceiverId())))
                 .andExpect(jsonPath("$[0].receiverUsername", is(transactionDTO.getReceiverUsername())))
                 .andExpect(jsonPath("$[0].description", is(transactionDTO.getDescription())))
                 .andExpect(jsonPath("$[0].amount", is(transactionDTO.getAmount())));
@@ -226,10 +213,7 @@ class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id", is(transactionDTO.getId())))
-                .andExpect(jsonPath("$[0].senderId", is(transactionDTO.getSenderId())))
                 .andExpect(jsonPath("$[0].senderUsername", is(transactionDTO.getSenderUsername())))
-                .andExpect(jsonPath("$[0].receiverId", is(transactionDTO.getReceiverId())))
                 .andExpect(jsonPath("$[0].receiverUsername", is(transactionDTO.getReceiverUsername())))
                 .andExpect(jsonPath("$[0].description", is(transactionDTO.getDescription())))
                 .andExpect(jsonPath("$[0].amount", is(transactionDTO.getAmount())));
@@ -262,8 +246,7 @@ class TransactionControllerTest {
         newTransaction.setDescription(transactionCreationDTO.getDescription());
         newTransaction.setAmount(transactionCreationDTO.getAmount());
 
-        when(transactionMapper.transactionCreationDTOToTransaction(transactionCreationDTO)).thenReturn(newTransaction);
-        when(transactionService.addTransaction(any(Transaction.class))).thenReturn(transaction);
+        when(transactionService.addTransaction(any(TransactionCreationDTO.class))).thenReturn(transaction);
         when(transactionMapper.transactionToTransactionDTO(transaction)).thenReturn(transactionDTO);
 
         // Act & Assert
@@ -272,16 +255,12 @@ class TransactionControllerTest {
                         .content(objectMapper.writeValueAsString(transactionCreationDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(transactionDTO.getId())))
-                .andExpect(jsonPath("$.senderId", is(transactionDTO.getSenderId())))
                 .andExpect(jsonPath("$.senderUsername", is(transactionDTO.getSenderUsername())))
-                .andExpect(jsonPath("$.receiverId", is(transactionDTO.getReceiverId())))
                 .andExpect(jsonPath("$.receiverUsername", is(transactionDTO.getReceiverUsername())))
                 .andExpect(jsonPath("$.description", is(transactionDTO.getDescription())))
                 .andExpect(jsonPath("$.amount", is(transactionDTO.getAmount())));
 
-        verify(transactionMapper).transactionCreationDTOToTransaction(transactionCreationDTO);
-        verify(transactionService).addTransaction(any(Transaction.class));
+        verify(transactionService).addTransaction(any(TransactionCreationDTO.class));
         verify(transactionMapper).transactionToTransactionDTO(transaction);
     }
 
@@ -292,8 +271,7 @@ class TransactionControllerTest {
         newTransaction.setDescription(transactionCreationDTO.getDescription());
         newTransaction.setAmount(transactionCreationDTO.getAmount());
 
-        when(transactionMapper.transactionCreationDTOToTransaction(transactionCreationDTO)).thenReturn(newTransaction);
-        when(transactionService.addTransaction(any(Transaction.class))).thenThrow(new RuntimeException("User with ID : 999 does not exist"));
+        when(transactionService.addTransaction(any(TransactionCreationDTO.class))).thenThrow(new RuntimeException("User with ID : 999 does not exist"));
 
         // Act & Assert
         mockMvc.perform(post("/transactions")
@@ -301,16 +279,38 @@ class TransactionControllerTest {
                         .content(objectMapper.writeValueAsString(transactionCreationDTO)))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(0)))
-                .andExpect(jsonPath("$.senderId", is(0)))
                 .andExpect(jsonPath("$.senderUsername", is(nullValue())))
-                .andExpect(jsonPath("$.receiverId", is(0)))
                 .andExpect(jsonPath("$.receiverUsername", is(nullValue())))
                 .andExpect(jsonPath("$.description", is(nullValue())))
                 .andExpect(jsonPath("$.amount", is(0.0)));
 
-        verify(transactionMapper).transactionCreationDTOToTransaction(transactionCreationDTO);
-        verify(transactionService).addTransaction(any(Transaction.class));
+        verify(transactionService).addTransaction(any(TransactionCreationDTO.class));
+        verify(transactionMapper, never()).transactionToTransactionDTO(any(Transaction.class));
+    }
+
+    @Test
+    void addTransaction_WithInsufficientBalance_ShouldReturnBadRequest() throws Exception {
+        // Arrange
+        TransactionCreationDTO insufficientBalanceDTO = new TransactionCreationDTO();
+        insufficientBalanceDTO.setSenderId(sender.getId());
+        insufficientBalanceDTO.setReceiverId(receiver.getId());
+        insufficientBalanceDTO.setDescription("Transaction with insufficient balance");
+        insufficientBalanceDTO.setAmount(1000.0); // Amount greater than sender's balance (500.0)
+
+        when(transactionService.addTransaction(any(TransactionCreationDTO.class))).thenThrow(new RuntimeException("Insufficient balance"));
+
+        // Act & Assert
+        mockMvc.perform(post("/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(insufficientBalanceDTO)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.senderUsername", is(nullValue())))
+                .andExpect(jsonPath("$.receiverUsername", is(nullValue())))
+                .andExpect(jsonPath("$.description", is(nullValue())))
+                .andExpect(jsonPath("$.amount", is(0.0)));
+
+        verify(transactionService).addTransaction(any(TransactionCreationDTO.class));
         verify(transactionMapper, never()).transactionToTransactionDTO(any(Transaction.class));
     }
 }

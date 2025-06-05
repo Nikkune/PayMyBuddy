@@ -23,7 +23,6 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -486,7 +485,7 @@ class UserControllerTest {
         List<User> connections = List.of(connectionUser);
         List<UserDTO> connectionDTOs = List.of(connectionUserDTO);
 
-        when(userService.addConnections(testUser.getId(), connectionUser.getId())).thenReturn(connections);
+        when(userService.addConnection(testUser.getId(), connectionUser.getId())).thenReturn(connections);
         when(userMapper.usersToUserDTOs(connections)).thenReturn(connectionDTOs);
 
         // Act & Assert
@@ -499,14 +498,14 @@ class UserControllerTest {
                 .andExpect(jsonPath("$[0].username", is(connectionUserDTO.getUsername())))
                 .andExpect(jsonPath("$[0].email", is(connectionUserDTO.getEmail())));
 
-        verify(userService).addConnections(testUser.getId(), connectionUser.getId());
+        verify(userService).addConnection(testUser.getId(), connectionUser.getId());
         verify(userMapper).usersToUserDTOs(connections);
     }
 
     @Test
     void addConnection_WithNonExistingId_ShouldReturnBadRequest() throws Exception {
         // Arrange
-        when(userService.addConnections(999, connectionUser.getId())).thenThrow(new RuntimeException("User with ID : 999 does not exist"));
+        when(userService.addConnection(999, connectionUser.getId())).thenThrow(new RuntimeException("User with ID : 999 does not exist"));
 
         // Act & Assert
         mockMvc.perform(post("/users/{id}/connections", 999)
@@ -515,7 +514,7 @@ class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(0)));
 
-        verify(userService).addConnections(999, connectionUser.getId());
+        verify(userService).addConnection(999, connectionUser.getId());
         verify(userMapper, never()).usersToUserDTOs(anyList());
     }
 
@@ -525,7 +524,7 @@ class UserControllerTest {
         List<User> connections = new ArrayList<>();
         List<UserDTO> connectionDTOs = new ArrayList<>();
 
-        when(userService.removeConnections(testUser.getId(), connectionUser.getId())).thenReturn(connections);
+        when(userService.removeConnection(testUser.getId(), connectionUser.getId())).thenReturn(connections);
         when(userMapper.usersToUserDTOs(connections)).thenReturn(connectionDTOs);
 
         // Act & Assert
@@ -535,14 +534,14 @@ class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(0)));
 
-        verify(userService).removeConnections(testUser.getId(), connectionUser.getId());
+        verify(userService).removeConnection(testUser.getId(), connectionUser.getId());
         verify(userMapper).usersToUserDTOs(connections);
     }
 
     @Test
     void removeConnection_WithNonExistingId_ShouldReturnBadRequest() throws Exception {
         // Arrange
-        when(userService.removeConnections(999, connectionUser.getId())).thenThrow(new RuntimeException("User with ID : 999 does not exist"));
+        when(userService.removeConnection(999, connectionUser.getId())).thenThrow(new RuntimeException("User with ID : 999 does not exist"));
 
         // Act & Assert
         mockMvc.perform(delete("/users/{id}/connections", 999)
@@ -551,7 +550,7 @@ class UserControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(0)));
 
-        verify(userService).removeConnections(999, connectionUser.getId());
+        verify(userService).removeConnection(999, connectionUser.getId());
         verify(userMapper, never()).usersToUserDTOs(anyList());
     }
 }
