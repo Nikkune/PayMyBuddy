@@ -1,7 +1,6 @@
 package dev.nikkune.paymybuddy.controller;
 
 import dev.nikkune.paymybuddy.dto.UserDTO;
-import dev.nikkune.paymybuddy.dto.UserRegistrationDTO;
 import dev.nikkune.paymybuddy.mapper.UserMapper;
 import dev.nikkune.paymybuddy.model.User;
 import dev.nikkune.paymybuddy.service.IUserService;
@@ -26,8 +25,9 @@ public class UserController {
 
     /**
      * Constructor for UserController
+     *
      * @param userService the user service
-     * @param userMapper the user mapper
+     * @param userMapper  the user mapper
      */
     public UserController(IUserService userService, UserMapper userMapper) {
         this.userService = userService;
@@ -36,6 +36,7 @@ public class UserController {
 
     /**
      * Get all users
+     *
      * @return list of all users
      */
     @GetMapping
@@ -49,6 +50,7 @@ public class UserController {
 
     /**
      * Get user by ID
+     *
      * @param userId the user ID
      * @return the user with the given ID
      */
@@ -68,6 +70,7 @@ public class UserController {
 
     /**
      * Get user by email
+     *
      * @param email the user email
      * @return the user with the given email
      */
@@ -86,27 +89,8 @@ public class UserController {
     }
 
     /**
-     * Register a new user
-     * @param userRegistrationDTO the user registration data
-     * @return the created user
-     */
-    @PostMapping
-    public ResponseEntity<UserDTO> registerUser(@RequestBody @Valid UserRegistrationDTO userRegistrationDTO) {
-        logger.debug("Received request to register user with username: {}", userRegistrationDTO.getUsername());
-        try {
-            User user = userMapper.userRegistrationDTOToUser(userRegistrationDTO);
-            User createdUser = userService.register(user);
-            UserDTO userDTO = userMapper.userToUserDTO(createdUser);
-            logger.info("User registered successfully with ID: {}", userDTO.getId());
-            return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            logger.error("Error registering user with username: {}", userRegistrationDTO.getUsername(), e);
-            return new ResponseEntity<>(new UserDTO(), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    /**
      * Update a user
+     *
      * @param userDTO the user data to update
      * @return the updated user
      */
@@ -129,9 +113,10 @@ public class UserController {
 
     /**
      * Update a user's password
-     * @param userId the user ID
+     *
+     * @param userId      the user ID
      * @param oldPassword the old password
-     * @param password the new password
+     * @param password    the new password
      * @return the updated user
      */
     @PutMapping("/password")
@@ -153,6 +138,7 @@ public class UserController {
 
     /**
      * Delete a user
+     *
      * @param userId the user ID
      * @return no content
      */
@@ -170,28 +156,8 @@ public class UserController {
     }
 
     /**
-     * Login a user
-     * @param email the user email
-     * @param password the user password
-     * @return ok if login successful, unauthorized if not
-     */
-    @PostMapping("/login")
-    public ResponseEntity<Object> login(
-            @RequestParam @Valid String email,
-            @RequestParam @Valid String password) {
-        logger.debug("Received login request for user with email: {}", email);
-        boolean loginSuccessful = userService.login(email, password);
-        if (loginSuccessful) {
-            logger.info("Login successful for user with email: {}", email);
-            return ResponseEntity.ok().build();
-        } else {
-            logger.error("Login failed for user with email: {}", email);
-            return new ResponseEntity<>(new Object(), HttpStatus.UNAUTHORIZED);
-        }
-    }
-
-    /**
      * Get a user's connections
+     *
      * @param id the user ID
      * @return the user's connections
      */
@@ -211,7 +177,8 @@ public class UserController {
 
     /**
      * Add a connection to a user
-     * @param id the user ID
+     *
+     * @param id           the user ID
      * @param connectionId the connection ID
      * @return the user's updated connections
      */
@@ -233,7 +200,8 @@ public class UserController {
 
     /**
      * Remove a connection from a user
-     * @param id the user ID
+     *
+     * @param id           the user ID
      * @param connectionId the connection ID
      * @return the user's updated connections
      */
