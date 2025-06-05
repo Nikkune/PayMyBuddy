@@ -4,7 +4,7 @@ import dev.nikkune.paymybuddy.dto.UserDTO;
 import dev.nikkune.paymybuddy.dto.UserRegistrationDTO;
 import dev.nikkune.paymybuddy.mapper.UserMapper;
 import dev.nikkune.paymybuddy.model.User;
-import dev.nikkune.paymybuddy.service.UserService;
+import dev.nikkune.paymybuddy.service.IUserService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-    private final UserService userService;
+    private final IUserService userService;
     private final UserMapper userMapper;
 
     /**
@@ -29,7 +29,7 @@ public class UserController {
      * @param userService the user service
      * @param userMapper the user mapper
      */
-    public UserController(UserService userService, UserMapper userMapper) {
+    public UserController(IUserService userService, UserMapper userMapper) {
         this.userService = userService;
         this.userMapper = userMapper;
     }
@@ -221,7 +221,7 @@ public class UserController {
             @RequestParam @Valid Integer connectionId) {
         logger.debug("Received request to add connection {} for user with ID: {}", connectionId, id);
         try {
-            List<User> connections = userService.addConnections(id, connectionId);
+            List<User> connections = userService.addConnection(id, connectionId);
             List<UserDTO> connectionDTOs = userMapper.usersToUserDTOs(connections);
             logger.info("Connection {} added successfully for user with ID: {}", connectionId, id);
             return ResponseEntity.ok(connectionDTOs);
@@ -243,7 +243,7 @@ public class UserController {
             @RequestParam @Valid Integer connectionId) {
         logger.debug("Received request to remove connection {} for user with ID: {}", connectionId, id);
         try {
-            List<User> connections = userService.removeConnections(id, connectionId);
+            List<User> connections = userService.removeConnection(id, connectionId);
             List<UserDTO> connectionDTOs = userMapper.usersToUserDTOs(connections);
             logger.info("Connection {} removed successfully for user with ID: {}", connectionId, id);
             return ResponseEntity.ok(connectionDTOs);

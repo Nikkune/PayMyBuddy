@@ -5,6 +5,7 @@ import dev.nikkune.paymybuddy.dto.TransactionDTO;
 import dev.nikkune.paymybuddy.mapper.TransactionMapper;
 import dev.nikkune.paymybuddy.model.Transaction;
 import dev.nikkune.paymybuddy.model.User;
+import dev.nikkune.paymybuddy.service.ITransactionService;
 import dev.nikkune.paymybuddy.service.TransactionService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ import java.util.List;
 @RequestMapping("/transactions")
 public class TransactionController {
     private static final Logger logger = LoggerFactory.getLogger(TransactionController.class);
-    private final TransactionService transactionService;
+    private final ITransactionService transactionService;
     private final TransactionMapper transactionMapper;
 
     /**
@@ -30,7 +31,7 @@ public class TransactionController {
      * @param transactionService the transaction service
      * @param transactionMapper the transaction mapper
      */
-    public TransactionController(TransactionService transactionService, TransactionMapper transactionMapper) {
+    public TransactionController(ITransactionService transactionService, TransactionMapper transactionMapper) {
         this.transactionService = transactionService;
         this.transactionMapper = transactionMapper;
     }
@@ -120,21 +121,10 @@ public class TransactionController {
         logger.debug("Received request to add transaction from sender ID: {} to receiver ID: {}", 
                 transactionCreationDTO.getSenderId(), transactionCreationDTO.getReceiverId());
         try {
-            Transaction transaction = transactionMapper.transactionCreationDTOToTransaction(transactionCreationDTO);
-
-            // Set sender and receiver
-            User sender = new User();
-            sender.setId(transactionCreationDTO.getSenderId());
-            transactionMapper.setSender(transaction, sender);
-
-            User receiver = new User();
-            receiver.setId(transactionCreationDTO.getReceiverId());
-            transactionMapper.setReceiver(transaction, receiver);
-
-            Transaction createdTransaction = transactionService.addTransaction(transaction);
+            Transaction createdTransaction = transactionService.addTransaction(transactionCreationDTO);
             TransactionDTO transactionDTO = transactionMapper.transactionToTransactionDTO(createdTransaction);
 
-            logger.info("Transaction added successfully with ID: {}", transactionDTO.getId());
+            logger.info("Transaction added successfully");
             return new ResponseEntity<>(transactionDTO, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             logger.error("Error adding transaction from sender ID: {} to receiver ID: {}", 

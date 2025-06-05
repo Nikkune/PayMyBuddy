@@ -19,9 +19,7 @@ public interface TransactionMapper {
      * @param transaction the Transaction entity
      * @return the TransactionDTO
      */
-    @Mapping(target = "senderId", source = "sender.id")
     @Mapping(target = "senderUsername", source = "sender.username")
-    @Mapping(target = "receiverId", source = "receiver.id")
     @Mapping(target = "receiverUsername", source = "receiver.username")
     TransactionDTO transactionToTransactionDTO(Transaction transaction);
 

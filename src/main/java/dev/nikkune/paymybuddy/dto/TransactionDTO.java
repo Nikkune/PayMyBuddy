@@ -10,17 +10,9 @@ import lombok.Data;
  */
 @Data
 public class TransactionDTO {
-    @NotNull(message = "Transaction ID is required")
-    private int id;
-
-    @NotNull(message = "Sender ID is required")
-    private int senderId;
 
     @NotBlank(message = "Sender username is required")
     private String senderUsername;
-
-    @NotNull(message = "Receiver ID is required")
-    private int receiverId;
 
     @NotBlank(message = "Receiver username is required")
     private String receiverUsername;
