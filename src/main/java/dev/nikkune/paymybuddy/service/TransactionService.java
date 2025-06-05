@@ -1,5 +1,6 @@
 package dev.nikkune.paymybuddy.service;
 
+import dev.nikkune.paymybuddy.dto.TransactionCreationDTO;
 import dev.nikkune.paymybuddy.model.Transaction;
 import dev.nikkune.paymybuddy.model.User;
 import dev.nikkune.paymybuddy.repository.TransactionRepository;
@@ -16,7 +17,7 @@ import java.util.List;
  */
 @Service
 @Transactional
-public class TransactionService {
+public class TransactionService implements ITransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
 
@@ -41,23 +42,13 @@ public class TransactionService {
     }
 
     /**
-     * Checks if a user with the given ID exists in the user repository.
-     *
-     * @param id the ID of the user to retrieve
-     * @return the User object if found, otherwise null
-     */
-    public User exists(int id) {
-        return userRepository.findById(id).orElse(null);
-    }
-
-    /**
      * Verifies if a user with the given ID exists. If the user does not exist, a RuntimeException is thrown.
      *
      * @param id the unique identifier of the user to be verified
      * @throws RuntimeException if the user with the specified ID does not exist
      */
     public void requiredUser(int id) throws RuntimeException {
-        User existingUser = exists(id);
+        User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser == null)
             throw new RuntimeException("User with ID : " + id + " does not exist");
 
@@ -88,10 +79,7 @@ public class TransactionService {
      */
     public List<Transaction> getTransactionsByUserId(int userId) throws RuntimeException {
         requiredUser(userId);
-        List<Transaction> transactions = transactionRepository.findBySenderId(userId);
-        transactions.addAll(transactionRepository.findByReceiverId(userId));
-
-        return transactions;
+        return transactionRepository.findBySenderIdOrReceiverId(userId, userId);
     }
 
     /**
@@ -113,13 +101,34 @@ public class TransactionService {
     /**
      * Adds a new transaction to the system after validating that both the sender and receiver exist.
      *
-     * @param transaction the transaction to be added, which includes sender, receiver, amount, and description
+     * @param transactionCreationDTO the transaction to be added, which includes sender, receiver, amount, and description
      * @return the saved transaction object
      * @throws RuntimeException if the sender or receiver does not exist
      */
-    public Transaction addTransaction(Transaction transaction) throws RuntimeException {
-        requiredUser(transaction.getSender().getId());
-        requiredUser(transaction.getReceiver().getId());
+    public Transaction addTransaction(TransactionCreationDTO transactionCreationDTO) throws RuntimeException {
+        User sender = userRepository.findById(transactionCreationDTO.getSenderId()).orElse(null);
+        if (sender == null)
+            throw new RuntimeException("Sender with ID : " + transactionCreationDTO.getSenderId() + " does not exist");
+
+        User receiver = userRepository.findById(transactionCreationDTO.getReceiverId()).orElse(null);
+        if (receiver == null)
+            throw new RuntimeException("Receiver with ID : " + transactionCreationDTO.getReceiverId() + " does not exist");
+
+        if (sender.getBalance() < transactionCreationDTO.getAmount())
+            throw new RuntimeException("Insufficient balance");
+
+        Transaction transaction = new Transaction();
+        transaction.setSender(sender);
+        transaction.setReceiver(receiver);
+        transaction.setAmount(transactionCreationDTO.getAmount());
+        transaction.setDescription(transactionCreationDTO.getDescription());
+
+        sender.setBalance(sender.getBalance() - transactionCreationDTO.getAmount());
+        receiver.setBalance(receiver.getBalance() + transactionCreationDTO.getAmount());
+
+        userRepository.save(sender);
+        userRepository.save(receiver);
+
         return transactionRepository.save(transaction);
     }
 }

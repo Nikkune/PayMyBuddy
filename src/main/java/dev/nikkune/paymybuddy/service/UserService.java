@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Service
 @Transactional
-public class UserService {
+public class UserService implements IUserService {
     private final UserRepository userRepository;
 
     /**
@@ -40,16 +40,6 @@ public class UserService {
     }
 
     /**
-     * Checks if a user with the given ID exists in the database.
-     *
-     * @param id the ID of the user to be checked
-     * @return the User object if found; otherwise, null
-     */
-    public User exists(int id) {
-        return userRepository.findById(id).orElse(null);
-    }
-
-    /**
      * Retrieves a user by their ID and verifies that the user exists in the system.
      * If the user does not exist, a {@code RuntimeException} is thrown.
      *
@@ -58,7 +48,7 @@ public class UserService {
      * @throws RuntimeException if the user with the specified ID does not exist
      */
     public User requiredUser(int id) throws RuntimeException {
-        User existingUser = exists(id);
+        User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser == null)
             throw new RuntimeException("User with ID : " + id + " does not exist");
 
@@ -207,7 +197,7 @@ public class UserService {
      * @return a list of connections for the user initiating the connection
      * @throws RuntimeException if any of the users do not exist or if the connection already exists
      */
-    public List<User> addConnections(int userId, int connectionId) throws RuntimeException {
+    public List<User> addConnection(int userId, int connectionId) throws RuntimeException {
         User existingUser = requiredUser(userId);
         User connection = requiredUser(connectionId);
         if (existingUser.getConnections().contains(connection))
@@ -225,7 +215,7 @@ public class UserService {
      * @return a list of remaining connections for the user after the removal
      * @throws RuntimeException if either user does not exist, or there is no existing connection between them
      */
-    public List<User> removeConnections(int userId, int connectionId) throws RuntimeException {
+    public List<User> removeConnection(int userId, int connectionId) throws RuntimeException {
         User existingUser = requiredUser(userId);
         User connection = requiredUser(connectionId);
         if (!existingUser.getConnections().contains(connection))
