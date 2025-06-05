@@ -75,9 +75,19 @@ The relationships and constraints ensure data integrity, referential integrity, 
   GET /users?userId={id}
 ```
 
-| Parameter | Type     | Description                       |
-|-----------|----------|-----------------------------------|
-| `id`      | `string` | **Required**. Id of user to fetch |
+| Parameter | Type     | Description                      |
+|-----------|----------|----------------------------------|
+| `id`      | `string` | **Required** Id of user to fetch |
+
+#### Get by email
+
+```http
+  GET /users/email?email={email}
+```
+
+| Parameter | Type     | Description                         |
+|-----------|----------|-------------------------------------|
+| `email`   | `string` | **Required** Email of user to fetch |
 
 #### Register
 
@@ -85,11 +95,11 @@ The relationships and constraints ensure data integrity, referential integrity, 
   POST /users
 ```
 
-| Parameter  | Type     | Description                                |
-|------------|----------|--------------------------------------------|
-| `username` | `string` | **Required**. The username of the new user |
-| `email`    | `string` | **Required**. The email of the new user    |
-| `password` | `string` | **Required**. The password of the new user |
+| Parameter  | Type     | Description                               |
+|------------|----------|-------------------------------------------|
+| `username` | `string` | **Required** The username of the new user |
+| `email`    | `string` | **Required** The email of the new user    |
+| `password` | `string` | **Required** The password of the new user |
 
 #### Update
 
@@ -97,13 +107,23 @@ The relationships and constraints ensure data integrity, referential integrity, 
   PUT /users
 ```
 
-| Parameter     | Type     | Description                                                |
-|---------------|----------|------------------------------------------------------------|
-| `id`          | `string` | **Required**. Id of user to update                         |
-| `username`    | `string` | The new username of the new user                           |
-| `email`       | `string` | The new email of the new user                              |
-| `oldPassword` | `string` | **Required if new password**. The password of the new user |
-| `password`    | `string` | The new password of the new user                           |
+| Parameter  | Type     | Description                       |
+|------------|----------|-----------------------------------|
+| `id`       | `string` | **Required** Id of user to update |
+| `username` | `string` | The new username of the user      |
+| `email`    | `string` | The new email of the user         |
+
+#### Update password
+
+```http
+  PUT /users/password
+```
+
+| Parameter     | Type     | Description                               |
+|---------------|----------|-------------------------------------------|
+| `id`          | `string` | **Required** Id of user to update         |
+| `oldPassword` | `string` | **Required** The old password of the user |
+| `password`    | `string` | **Required** The new password of the user |
 
 #### Delete
 
@@ -111,9 +131,9 @@ The relationships and constraints ensure data integrity, referential integrity, 
   DELETE /users?userId={id}
 ```
 
-| Parameter | Type     | Description                        |
-|-----------|----------|------------------------------------|
-| `id`      | `string` | **Required**. Id of user to delete |
+| Parameter | Type     | Description                       |
+|-----------|----------|-----------------------------------|
+| `id`      | `string` | **Required** Id of user to delete |
 
 #### Login
 
@@ -121,10 +141,10 @@ The relationships and constraints ensure data integrity, referential integrity, 
   POST /users/login
 ```
 
-| Parameter  | Type     | Description                            |
-|------------|----------|----------------------------------------|
-| `email`    | `string` | **Required**. The email of the user    |
-| `password` | `string` | **Required**. The password of the user |
+| Parameter  | Type     | Description                           |
+|------------|----------|---------------------------------------|
+| `email`    | `string` | **Required** The email of the user    |
+| `password` | `string` | **Required** The password of the user |
 
 #### Get connections
 
@@ -132,9 +152,9 @@ The relationships and constraints ensure data integrity, referential integrity, 
   GET /users/{id}/connections
 ```
 
-| Parameter | Type     | Description                                             |
-|-----------|----------|---------------------------------------------------------|
-| `id`      | `string` | **Required**. Id of user to get all of it's connections |
+| Parameter | Type     | Description                                            |
+|-----------|----------|--------------------------------------------------------|
+| `id`      | `string` | **Required** Id of user to get all of it's connections |
 
 #### Add connections
 
@@ -142,10 +162,10 @@ The relationships and constraints ensure data integrity, referential integrity, 
   POST /users/{id}/connections
 ```
 
-| Parameter      | Type     | Description                                             |
-|----------------|----------|---------------------------------------------------------|
-| `id`           | `string` | **Required**. Id of user to get all of it's connections |
-| `connectionId` | `string` | **Required**. Id of the user to add connections         |
+| Parameter      | Type     | Description                                            |
+|----------------|----------|--------------------------------------------------------|
+| `id`           | `string` | **Required** Id of user to get all of it's connections |
+| `connectionId` | `string` | **Required** Id of the user to add connections         |
 
 #### Delete connections
 
@@ -153,10 +173,10 @@ The relationships and constraints ensure data integrity, referential integrity, 
   DELETE /users/{id}/connections
 ```
 
-| Parameter      | Type     | Description                                             |
-|----------------|----------|---------------------------------------------------------|
-| `id`           | `string` | **Required**. Id of user to get all of it's connections |
-| `connectionId` | `string` | **Required**. Id of the user to remove connections      |
+| Parameter      | Type     | Description                                            |
+|----------------|----------|--------------------------------------------------------|
+| `id`           | `string` | **Required** Id of user to get all of it's connections |
+| `connectionId` | `string` | **Required** Id of the user to remove connections      |
 
 
 ### Transactions
@@ -167,9 +187,9 @@ The relationships and constraints ensure data integrity, referential integrity, 
   GET /transactions/id?transactionId={id}
 ```
 
-| Parameter | Type     | Description                               |
-|-----------|----------|-------------------------------------------|
-| `id`      | `string` | **Required**. Id of transactions to fetch |
+| Parameter | Type     | Description                              |
+|-----------|----------|------------------------------------------|
+| `id`      | `string` | **Required** Id of transactions to fetch |
 
 #### Get user transactions
 
@@ -177,9 +197,9 @@ The relationships and constraints ensure data integrity, referential integrity, 
   GET /transactions/user?userId={id}
 ```
 
-| Parameter | Type     | Description                                  |
-|-----------|----------|----------------------------------------------|
-| `id`      | `string` | **Required**. Id of user to get transactions |
+| Parameter | Type     | Description                                 |
+|-----------|----------|---------------------------------------------|
+| `id`      | `string` | **Required** Id of user to get transactions |
 
 #### Get transactions between users
 
@@ -187,10 +207,10 @@ The relationships and constraints ensure data integrity, referential integrity, 
   GET /transactions?senderId={senderId}&receiverId={receiverId}
 ```
 
-| Parameter    | Type     | Description                  |
-|--------------|----------|------------------------------|
-| `senderId`   | `string` | **Required**. Id of sender   |
-| `receiverId` | `string` | **Required**. Id of receiver |
+| Parameter    | Type     | Description                 |
+|--------------|----------|-----------------------------|
+| `senderId`   | `string` | **Required** Id of sender   |
+| `receiverId` | `string` | **Required** Id of receiver |
 
 #### Add transactions
 
@@ -198,12 +218,12 @@ The relationships and constraints ensure data integrity, referential integrity, 
   POST /transactions
 ```
 
-| Parameter     | Type     | Description                              |
-|---------------|----------|------------------------------------------|
-| `senderId`    | `string` | **Required**. Id of sender               |
-| `receiverId`  | `string` | **Required**. Id of receiver             |
-| `amount`      | `double` | **Required**. Amount for the transaction |
-| `description` | `string` | A description for the transaction        |
+| Parameter     | Type     | Description                             |
+|---------------|----------|-----------------------------------------|
+| `senderId`    | `string` | **Required** Id of sender               |
+| `receiverId`  | `string` | **Required** Id of receiver             |
+| `amount`      | `double` | **Required** Amount for the transaction |
+| `description` | `string` | A description for the transaction       |
 
 
 ## Author
