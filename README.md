@@ -61,6 +61,40 @@ The database model consists of three main entities:
 The relationships and constraints ensure data integrity, referential integrity, and support the application's functionality effectively.
 ## API Reference
 
+### Authentication Endpoints
+
+#### Login
+
+```http
+POST /auth/login
+```
+
+| Parameter  | Type     | Description                           |
+|------------|----------|---------------------------------------|
+| `email`    | `string` | **Required** The email of the user    |
+| `password` | `string` | **Required** The password of the user |
+
+#### Register
+
+```http
+POST /auth/register
+```
+
+| Parameter  | Type     | Description                               |
+|------------|----------|-------------------------------------------|
+| `username` | `string` | **Required** The username of the new user |
+| `email`    | `string` | **Required** The email of the new user    |
+| `password` | `string` | **Required** The password of the new user |
+
+#### Logout
+
+```http
+POST /auth/logout
+```
+
+No parameters required. The user must be authenticated to access this endpoint.
+
+
 ### Users
 
 #### Get all
@@ -88,18 +122,6 @@ The relationships and constraints ensure data integrity, referential integrity, 
 | Parameter | Type     | Description                         |
 |-----------|----------|-------------------------------------|
 | `email`   | `string` | **Required** Email of user to fetch |
-
-#### Register
-
-```http
-  POST /users
-```
-
-| Parameter  | Type     | Description                               |
-|------------|----------|-------------------------------------------|
-| `username` | `string` | **Required** The username of the new user |
-| `email`    | `string` | **Required** The email of the new user    |
-| `password` | `string` | **Required** The password of the new user |
 
 #### Update
 
@@ -135,16 +157,6 @@ The relationships and constraints ensure data integrity, referential integrity, 
 |-----------|-------|-----------------------------------|
 | `id`      | `int` | **Required** Id of user to delete |
 
-#### Login
-
-```http
-  POST /users/login
-```
-
-| Parameter  | Type     | Description                           |
-|------------|----------|---------------------------------------|
-| `email`    | `string` | **Required** The email of the user    |
-| `password` | `string` | **Required** The password of the user |
 
 #### Get connections
 
@@ -229,4 +241,3 @@ The relationships and constraints ensure data integrity, referential integrity, 
 ## Author
 
 - [@Nikkune](https://www.github.com/Nikkune)
-
