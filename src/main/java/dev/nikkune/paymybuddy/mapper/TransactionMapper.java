@@ -31,17 +31,6 @@ public interface TransactionMapper {
     List<TransactionDTO> transactionsToTransactionDTOs(List<Transaction> transactions);
 
     /**
-     * Converts a TransactionCreationDTO to a Transaction entity
-     * This method requires the actual User objects to be set separately
-     * @param transactionCreationDTO the TransactionCreationDTO
-     * @return the Transaction entity with null sender and receiver
-     */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "sender", ignore = true)
-    @Mapping(target = "receiver", ignore = true)
-    Transaction transactionCreationDTOToTransaction(TransactionCreationDTO transactionCreationDTO);
-
-    /**
      * Updates a Transaction entity with a sender User
      * @param transaction the Transaction entity to update
      * @param sender the sender User

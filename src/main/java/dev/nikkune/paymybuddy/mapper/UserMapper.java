@@ -31,13 +31,6 @@ public interface UserMapper {
     List<UserDTO> usersToUserDTOs(List<User> users);
 
     /**
-     * Converts a UserRegistrationDTO to a User entity
-     * @param userRegistrationDto the UserRegistrationDto
-     * @return the User entity
-     */
-    User userRegistrationDTOToUser(UserRegistrationDTO userRegistrationDto);
-
-    /**
      * Converts a UserUpdateDTO to a User entity.
      *
      * @param userUpdateDTO the UserUpdateDTO containing the updated user information

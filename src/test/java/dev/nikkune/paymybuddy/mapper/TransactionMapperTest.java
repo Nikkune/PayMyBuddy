@@ -101,27 +101,6 @@ class TransactionMapperTest {
     }
 
     @Test
-    void transactionCreationDTOToTransaction_ShouldMapDTOToTransaction() {
-        // Arrange
-        TransactionCreationDTO creationDTO = new TransactionCreationDTO();
-        creationDTO.setDescription("New transaction");
-        creationDTO.setAmount(75.0);
-        creationDTO.setSenderId(sender.getId());
-        creationDTO.setReceiverId(receiver.getId());
-
-        // Act
-        Transaction result = transactionMapper.transactionCreationDTOToTransaction(creationDTO);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(0, result.getId()); // ID should be ignored in mapping
-        assertNull(result.getSender()); // Sender should be ignored in mapping
-        assertNull(result.getReceiver()); // Receiver should be ignored in mapping
-        assertEquals(creationDTO.getDescription(), result.getDescription());
-        assertEquals(creationDTO.getAmount(), result.getAmount());
-    }
-
-    @Test
     void setSender_ShouldSetSenderOnTransaction() {
         // Arrange
         Transaction transactionWithoutSender = new Transaction();

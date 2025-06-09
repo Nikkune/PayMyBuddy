@@ -101,24 +101,6 @@ class UserMapperTest {
     }
 
     @Test
-    void userRegistrationDTOToUser_ShouldMapDTOToUser() {
-        // Arrange
-        UserRegistrationDTO registrationDTO = new UserRegistrationDTO();
-        registrationDTO.setUsername("newuser");
-        registrationDTO.setEmail("new@example.com");
-        registrationDTO.setPassword("newpassword");
-
-        // Act
-        User user = userMapper.userRegistrationDTOToUser(registrationDTO);
-
-        // Assert
-        assertNotNull(user);
-        assertEquals(registrationDTO.getUsername(), user.getUsername());
-        assertEquals(registrationDTO.getEmail(), user.getEmail());
-        assertEquals(registrationDTO.getPassword(), user.getPassword());
-    }
-
-    @Test
     void mapConnectionsToIds_WithConnections_ShouldReturnIdList() {
         // Arrange
         testUser.getConnections().add(connectionUser);

@@ -77,7 +77,7 @@ public class AuthController {
             // Get user details
             User user = userService.getUserByEmail(loginDTO.getEmail());
 
-            Response responseBody = new Response("Registration successful", true)
+            Response responseBody = new Response("Login successful", true)
                     .add("userId", user.getId())
                     .add("username", user.getUsername())
                     .add("email", user.getEmail())

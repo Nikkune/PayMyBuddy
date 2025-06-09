@@ -37,6 +37,21 @@ public class UserController {
     }
 
     /**
+     * Get a user by email
+     *
+     * @param email the email of the user to get
+     * @return the user
+     */
+    @GetMapping("/email")
+    public ResponseEntity<UserDTO> getUserByEmail(@RequestParam @Valid String email) {
+        logger.debug("Received request to get user with email: {}", email);
+        User user = userService.getUserByEmail(email);
+        UserDTO userDTO = userMapper.userToUserDTO(user);
+        logger.info("Returning user with email: {}", email);
+        return ResponseEntity.ok(userDTO);
+    }
+
+    /**
      * Update a user
      *
      * @param userUpdateDTO the user data to update

@@ -55,20 +55,6 @@ class UserServiceTest {
     }
 
     @Test
-    void getAllUsers_ShouldReturnAllUsers() {
-        // Arrange
-        List<User> expectedUsers = Arrays.asList(testUser, connectionUser);
-        when(userRepository.findAll()).thenReturn(expectedUsers);
-
-        // Act
-        List<User> actualUsers = userService.getAllUsers();
-
-        // Assert
-        assertEquals(expectedUsers, actualUsers);
-        verify(userRepository).findAll();
-    }
-
-    @Test
     void requiredUser_WithExistingId_ShouldReturnUser() {
         // Arrange
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
@@ -88,21 +74,8 @@ class UserServiceTest {
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.requiredUser(999));
-        assertEquals("User with ID : 999 does not exist", exception.getMessage());
+        assertEquals("User with ID : 999 not found", exception.getMessage());
         verify(userRepository).findById(999);
-    }
-
-    @Test
-    void getUserById_WithExistingId_ShouldReturnUser() {
-        // Arrange
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-
-        // Act
-        User result = userService.getUserById(testUser.getId());
-
-        // Assert
-        assertEquals(testUser, result);
-        verify(userRepository).findById(testUser.getId());
     }
 
     @Test
@@ -126,7 +99,7 @@ class UserServiceTest {
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.getUserByEmail(nonExistingEmail));
-        assertEquals("User with email : " + nonExistingEmail + " does not exist", exception.getMessage());
+        assertEquals("User with email : " + nonExistingEmail + " not found", exception.getMessage());
         verify(userRepository).findByEmail(nonExistingEmail);
     }
 
@@ -206,69 +179,6 @@ class UserServiceTest {
     }
 
     @Test
-    void updatePassword_WithValidCredentials_ShouldUpdatePassword() {
-        // Arrange
-        String oldPassword = "oldPassword";
-        String newPassword = "newPassword";
-        String encodedNewPassword = "encodedNewPassword";
-
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        when(userRepository.save(any(User.class))).thenReturn(testUser);
-
-        try (MockedStatic<PasswordUtil> passwordUtilMock = mockStatic(PasswordUtil.class)) {
-            passwordUtilMock.when(() -> PasswordUtil.matches(oldPassword, testUser.getPassword())).thenReturn(true);
-            passwordUtilMock.when(() -> PasswordUtil.encodePassword(newPassword)).thenReturn(encodedNewPassword);
-
-            // Act
-            User result = userService.updatePassword(testUser.getId(), oldPassword, newPassword);
-
-            // Assert
-            assertEquals(testUser, result);
-            assertEquals(encodedNewPassword, testUser.getPassword());
-            verify(userRepository).findById(testUser.getId());
-            verify(userRepository).save(testUser);
-
-            // Don't verify the exact calls to static methods as they can be tricky with Mockito
-            // Instead, just verify that the password was updated correctly
-        }
-    }
-
-    @Test
-    void updatePassword_WithInvalidOldPassword_ShouldThrowException() {
-        // Arrange
-        String oldPassword = "wrongPassword";
-        String newPassword = "newPassword";
-
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-
-        try (MockedStatic<PasswordUtil> passwordUtilMock = mockStatic(PasswordUtil.class)) {
-            passwordUtilMock.when(() -> PasswordUtil.matches(oldPassword, testUser.getPassword())).thenReturn(false);
-
-            // Act & Assert
-            RuntimeException exception = assertThrows(RuntimeException.class, 
-                () -> userService.updatePassword(testUser.getId(), oldPassword, newPassword));
-            assertEquals("Old password does not match", exception.getMessage());
-            verify(userRepository).findById(testUser.getId());
-            verify(userRepository, never()).save(any(User.class));
-            passwordUtilMock.verify(() -> PasswordUtil.matches(oldPassword, testUser.getPassword()));
-        }
-    }
-
-    @Test
-    void deleteUser_WithExistingId_ShouldDeleteUser() {
-        // Arrange
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        doNothing().when(userRepository).delete(testUser);
-
-        // Act
-        userService.deleteUser(testUser.getId());
-
-        // Assert
-        verify(userRepository).findById(testUser.getId());
-        verify(userRepository).delete(testUser);
-    }
-
-    @Test
     void login_WithValidCredentials_ShouldReturnTrue() {
         // Arrange
         String password = "password123";
@@ -318,7 +228,7 @@ class UserServiceTest {
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, 
             () -> userService.login(nonExistingEmail, password));
-        assertEquals("User with email : " + nonExistingEmail + " does not exist", exception.getMessage());
+        assertEquals("User with email : " + nonExistingEmail + " not found", exception.getMessage());
         verify(userRepository).findByEmail(nonExistingEmail);
     }
 
@@ -338,19 +248,19 @@ class UserServiceTest {
     }
 
     @Test
-    void addConnections_WithValidIds_ShouldAddConnection() {
+    void addConnections_WithValidEmail_ShouldAddConnection() {
         // Arrange
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        when(userRepository.findById(connectionUser.getId())).thenReturn(Optional.of(connectionUser));
+        when(userRepository.findByEmail(connectionUser.getEmail())).thenReturn(Optional.of(connectionUser));
 
         // Act
-        List<User> result = userService.addConnection(testUser.getId(), connectionUser.getId());
+        List<User> result = userService.addConnection(testUser.getId(), connectionUser.getEmail());
 
         // Assert
         assertEquals(1, result.size());
         assertEquals(connectionUser, result.get(0));
         verify(userRepository).findById(testUser.getId());
-        verify(userRepository).findById(connectionUser.getId());
+        verify(userRepository).findByEmail(connectionUser.getEmail());
     }
 
     @Test
@@ -358,43 +268,13 @@ class UserServiceTest {
         // Arrange
         testUser.getConnections().add(connectionUser);
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        when(userRepository.findById(connectionUser.getId())).thenReturn(Optional.of(connectionUser));
+        when(userRepository.findByEmail(connectionUser.getEmail())).thenReturn(Optional.of(connectionUser));
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> userService.addConnection(testUser.getId(), connectionUser.getId()));
+            () -> userService.addConnection(testUser.getId(), connectionUser.getEmail()));
         assertEquals("User is already connected to this user", exception.getMessage());
         verify(userRepository).findById(testUser.getId());
-        verify(userRepository).findById(connectionUser.getId());
-    }
-
-    @Test
-    void removeConnections_WithValidIds_ShouldRemoveConnection() {
-        // Arrange
-        testUser.getConnections().add(connectionUser);
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        when(userRepository.findById(connectionUser.getId())).thenReturn(Optional.of(connectionUser));
-
-        // Act
-        List<User> result = userService.removeConnection(testUser.getId(), connectionUser.getId());
-
-        // Assert
-        assertEquals(0, result.size());
-        verify(userRepository).findById(testUser.getId());
-        verify(userRepository).findById(connectionUser.getId());
-    }
-
-    @Test
-    void removeConnection_WithNonExistingConnection_ShouldThrowException() {
-        // Arrange
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        when(userRepository.findById(connectionUser.getId())).thenReturn(Optional.of(connectionUser));
-
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> userService.removeConnection(testUser.getId(), connectionUser.getId()));
-        assertEquals("User is not connected to this user", exception.getMessage());
-        verify(userRepository).findById(testUser.getId());
-        verify(userRepository).findById(connectionUser.getId());
+        verify(userRepository).findByEmail(connectionUser.getEmail());
     }
 }

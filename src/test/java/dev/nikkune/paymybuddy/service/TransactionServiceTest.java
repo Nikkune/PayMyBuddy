@@ -67,20 +67,6 @@ class TransactionServiceTest {
     }
 
     @Test
-    void getAllTransactions_ShouldReturnAllTransactions() {
-        // Arrange
-        List<Transaction> expectedTransactions = Arrays.asList(transaction);
-        when(transactionRepository.findAll()).thenReturn(expectedTransactions);
-
-        // Act
-        List<Transaction> actualTransactions = transactionService.getAllTransactions();
-
-        // Assert
-        assertEquals(expectedTransactions, actualTransactions);
-        verify(transactionRepository).findAll();
-    }
-
-    @Test
     void requiredUser_WithExistingId_ShouldNotThrowException() {
         // Arrange
         when(userRepository.findById(sender.getId())).thenReturn(Optional.of(sender));
@@ -97,32 +83,8 @@ class TransactionServiceTest {
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> transactionService.requiredUser(999));
-        assertEquals("User with ID : 999 does not exist", exception.getMessage());
+        assertEquals("User with ID : 999 not found", exception.getMessage());
         verify(userRepository).findById(999);
-    }
-
-    @Test
-    void getTransactionById_WithExistingId_ShouldReturnTransaction() {
-        // Arrange
-        when(transactionRepository.findById(transaction.getId())).thenReturn(Optional.of(transaction));
-
-        // Act
-        Transaction result = transactionService.getTransactionById(transaction.getId());
-
-        // Assert
-        assertEquals(transaction, result);
-        verify(transactionRepository).findById(transaction.getId());
-    }
-
-    @Test
-    void getTransactionById_WithNonExistingId_ShouldThrowException() {
-        // Arrange
-        when(transactionRepository.findById(999)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> transactionService.getTransactionById(999));
-        assertEquals("Transaction with ID : 999 does not exist", exception.getMessage());
-        verify(transactionRepository).findById(999);
     }
 
     @Test
@@ -154,59 +116,9 @@ class TransactionServiceTest {
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> transactionService.getTransactionsByUserId(999));
-        assertEquals("User with ID : 999 does not exist", exception.getMessage());
+        assertEquals("User with ID : 999 not found", exception.getMessage());
         verify(userRepository).findById(999);
-        verify(transactionRepository, never()).findBySenderId(anyInt());
-        verify(transactionRepository, never()).findByReceiverId(anyInt());
-    }
-
-    @Test
-    void getTransactionsBetweenUsers_WithExistingIds_ShouldReturnTransactions() {
-        // Arrange
-        List<Transaction> sentTransactions = Arrays.asList(transaction);
-
-        when(userRepository.findById(sender.getId())).thenReturn(Optional.of(sender));
-        when(userRepository.findById(receiver.getId())).thenReturn(Optional.of(receiver));
-        when(transactionRepository.findBySenderId(sender.getId())).thenReturn(sentTransactions);
-
-        // Act
-        List<Transaction> result = transactionService.getTransactionsBetweenUsers(sender.getId(), receiver.getId());
-
-        // Assert
-        assertEquals(1, result.size());
-        assertEquals(transaction, result.get(0));
-        verify(userRepository).findById(sender.getId());
-        verify(userRepository).findById(receiver.getId());
-        verify(transactionRepository).findBySenderId(sender.getId());
-    }
-
-    @Test
-    void getTransactionsBetweenUsers_WithNonExistingSender_ShouldThrowException() {
-        // Arrange
-        when(userRepository.findById(999)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> transactionService.getTransactionsBetweenUsers(999, receiver.getId()));
-        assertEquals("User with ID : 999 does not exist", exception.getMessage());
-        verify(userRepository).findById(999);
-        verify(userRepository, never()).findById(receiver.getId());
-        verify(transactionRepository, never()).findBySenderId(anyInt());
-    }
-
-    @Test
-    void getTransactionsBetweenUsers_WithNonExistingReceiver_ShouldThrowException() {
-        // Arrange
-        when(userRepository.findById(sender.getId())).thenReturn(Optional.of(sender));
-        when(userRepository.findById(999)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
-            () -> transactionService.getTransactionsBetweenUsers(sender.getId(), 999));
-        assertEquals("User with ID : 999 does not exist", exception.getMessage());
-        verify(userRepository).findById(sender.getId());
-        verify(userRepository).findById(999);
-        verify(transactionRepository, never()).findBySenderId(anyInt());
+        verify(transactionRepository, never()).findBySenderIdOrReceiverId(anyInt(), anyInt());
     }
 
     @Test
@@ -253,7 +165,7 @@ class TransactionServiceTest {
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, 
             () -> transactionService.addTransaction(transactionCreationDTO));
-        assertEquals("Sender with ID : " + 999 + " does not exist", exception.getMessage());
+        assertEquals("Sender with ID : " + 999 + " not found", exception.getMessage());
         verify(userRepository).findById(999);
         verify(userRepository, never()).findById(receiver.getId());
         verify(transactionRepository, never()).save(any(Transaction.class));
@@ -273,7 +185,7 @@ class TransactionServiceTest {
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, 
             () -> transactionService.addTransaction(transactionCreationDTO));
-        assertEquals("Receiver with ID : " + 999 + " does not exist", exception.getMessage());
+        assertEquals("Receiver with ID : " + 999 + " not found", exception.getMessage());
         verify(userRepository).findById(sender.getId());
         verify(userRepository).findById(999);
         verify(transactionRepository, never()).save(any(Transaction.class));
