@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -46,39 +45,32 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // Disable CSRF for REST APIs
-        http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
 
-        // Configure CORS
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+        http
+                // Disable CSRF for REST APIs
+                .csrf().disable()
 
-        // Configure session management to be stateless
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
+                // Configure CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-        // Configure authorization rules
-        http.authorizeHttpRequests(auth -> auth
-                // Allow public access to authentication endpoints
-                .requestMatchers("/auth/**").permitAll()
-                // Allow OPTIONS requests for CORS preflight
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // Require authentication for all other requests
-                .anyRequest().authenticated()
-        );
+                // Configure session management to be stateless
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 
-        // Configure HTTP Basic Authentication
-        http.httpBasic(httpBasic -> {
-        });
+                // Configure authorization rules
+                .authorizeHttpRequests(auth -> auth
+                        // Allow public access to authentication endpoints
+                        .requestMatchers("/auth/**").permitAll()
 
-        // Configure logout
-        http.logout(logout -> logout
-                .logoutUrl("/auth/logout")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    // Do nothing - the controller will handle the response
-                })
-                .invalidateHttpSession(true)
-                .clearAuthentication(true)
-                .permitAll()
-        );
+                        // Allow OPTIONS requests for CORS preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Require authentication for all other requests
+                        .anyRequest().authenticated()
+                )
+
+                // Désactiver HTTP Basic
+                .httpBasic(basic -> {
+                });
 
         return http.build();
     }
@@ -92,11 +84,19 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*")); // In production, restrict to your frontend domain
+        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // In production, restrict to your frontend domain
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
-        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept"
+        ));
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization"
+        ));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

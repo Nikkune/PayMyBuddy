@@ -33,15 +33,6 @@ public class TransactionService implements ITransactionService {
     }
 
     /**
-     * Retrieves a list of all transactions stored in the system.
-     *
-     * @return a list of Transaction objects representing all transactions.
-     */
-    public List<Transaction> getAllTransactions(){
-        return transactionRepository.findAll();
-    }
-
-    /**
      * Verifies if a user with the given ID exists. If the user does not exist, a RuntimeException is thrown.
      *
      * @param id the unique identifier of the user to be verified
@@ -50,23 +41,7 @@ public class TransactionService implements ITransactionService {
     public void requiredUser(int id) throws RuntimeException {
         User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser == null)
-            throw new RuntimeException("User with ID : " + id + " does not exist");
-
-    }
-
-    /**
-     * Retrieves a transaction by its unique identifier.
-     *
-     * @param id the unique identifier of the transaction to retrieve
-     * @return the {@code Transaction} object corresponding to the provided ID
-     * @throws RuntimeException if no transaction is found with the given ID
-     */
-    public Transaction getTransactionById(int id) throws RuntimeException {
-        Transaction existingTransaction = transactionRepository.findById(id).orElse(null);
-        if (existingTransaction == null)
-            throw new RuntimeException("Transaction with ID : " + id + " does not exist");
-
-        return existingTransaction;
+            throw new RuntimeException("User with ID : " + id + " not found");
     }
 
     /**
@@ -83,22 +58,6 @@ public class TransactionService implements ITransactionService {
     }
 
     /**
-     * Retrieves a list of transactions made by one user to another user.
-     * This method verifies the existence of both users before fetching the data.
-     *
-     * @param senderId the ID of the user who initiated the transactions
-     * @param receiverId the ID of the user who received the transactions
-     * @return a list of transactions sent by the user with the given sender ID to the user with the given receiver ID
-     * @throws RuntimeException if either sender or receiver does not exist
-     */
-    public List<Transaction> getTransactionsBetweenUsers(int senderId, int receiverId){
-        requiredUser(senderId);
-        requiredUser(receiverId);
-        List<Transaction> transactions = transactionRepository.findBySenderId(senderId);
-        return transactions.stream().filter(transaction -> transaction.getReceiver().getId() == receiverId).toList();
-    }
-
-    /**
      * Adds a new transaction to the system after validating that both the sender and receiver exist.
      *
      * @param transactionCreationDTO the transaction to be added, which includes sender, receiver, amount, and description
@@ -108,11 +67,11 @@ public class TransactionService implements ITransactionService {
     public Transaction addTransaction(TransactionCreationDTO transactionCreationDTO) throws RuntimeException {
         User sender = userRepository.findById(transactionCreationDTO.getSenderId()).orElse(null);
         if (sender == null)
-            throw new RuntimeException("Sender with ID : " + transactionCreationDTO.getSenderId() + " does not exist");
+            throw new RuntimeException("Sender with ID : " + transactionCreationDTO.getSenderId() + " not found");
 
         User receiver = userRepository.findById(transactionCreationDTO.getReceiverId()).orElse(null);
         if (receiver == null)
-            throw new RuntimeException("Receiver with ID : " + transactionCreationDTO.getReceiverId() + " does not exist");
+            throw new RuntimeException("Receiver with ID : " + transactionCreationDTO.getReceiverId() + " not found");
 
         if (sender.getBalance() < transactionCreationDTO.getAmount())
             throw new RuntimeException("Insufficient balance");

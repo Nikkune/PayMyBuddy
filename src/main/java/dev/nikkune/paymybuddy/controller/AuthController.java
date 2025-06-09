@@ -4,6 +4,7 @@ import dev.nikkune.paymybuddy.dto.LoginDTO;
 import dev.nikkune.paymybuddy.dto.UserRegistrationDTO;
 import dev.nikkune.paymybuddy.model.User;
 import dev.nikkune.paymybuddy.service.UserService;
+import dev.nikkune.paymybuddy.utils.Response;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -18,9 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * AuthController is a REST controller that handles authentication and user-related operations.
@@ -49,7 +47,7 @@ public class AuthController {
      * Constructs an instance of AuthController with the specified services
      * for user management and authentication management.
      *
-     * @param userService the service responsible for user-related operations
+     * @param userService           the service responsible for user-related operations
      * @param authenticationManager the Spring Security authentication manager
      *                              responsible for managing user authentication
      */
@@ -79,17 +77,18 @@ public class AuthController {
             // Get user details
             User user = userService.getUserByEmail(loginDTO.getEmail());
 
-            // Create response
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Login successful");
-            response.put("userId", user.getId());
-            response.put("username", user.getUsername());
-            response.put("email", user.getEmail());
+            Response responseBody = new Response("Registration successful", true)
+                    .add("userId", user.getId())
+                    .add("username", user.getUsername())
+                    .add("email", user.getEmail())
+                    .add("balance", user.getBalance());
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(responseBody);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Authentication failed: " + e.getMessage()));
+            Response responseBody = new Response("Authentication failed", false).error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
+
         }
     }
 
@@ -100,8 +99,8 @@ public class AuthController {
      *
      * @param registrationDTO the data transfer object containing registration details such as username, email, and password
      * @return a ResponseEntity containing:
-     *         - HTTP status 201 (Created) and user details upon successful registration
-     *         - HTTP status 400 (Bad Request) and an error message in case of failure
+     * - HTTP status 201 (Created) and user details upon successful registration
+     * - HTTP status 400 (Bad Request) and an error message in case of failure
      */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid UserRegistrationDTO registrationDTO) {
@@ -116,17 +115,17 @@ public class AuthController {
             // Register the user
             User registeredUser = userService.register(newUser);
 
-            // Create response
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Registration successful");
-            response.put("userId", registeredUser.getId());
-            response.put("username", registeredUser.getUsername());
-            response.put("email", registeredUser.getEmail());
+            Response responseBody = new Response("Registration successful", true)
+                    .add("userId", registeredUser.getId())
+                    .add("username", registeredUser.getUsername())
+                    .add("email", registeredUser.getEmail())
+                    .add("balance", registeredUser.getBalance());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Registration failed: " + e.getMessage()));
+            Response responseBody = new Response("Registration failed", false).error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 
@@ -138,7 +137,7 @@ public class AuthController {
      * @param request  the {@code HttpServletRequest} object containing client request data
      * @param response the {@code HttpServletResponse} object used to send the server response
      * @return a {@code ResponseEntity} containing a success message if logout is successful,
-     *         or an error message if an exception occurs during the logout process
+     * or an error message if an exception occurs during the logout process
      */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
@@ -151,14 +150,13 @@ public class AuthController {
                 new SecurityContextLogoutHandler().logout(request, response, authentication);
             }
 
-            // Create response
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("message", "Logout successful");
+            Response responseBody = new Response("Logout successful", true);
 
             return ResponseEntity.ok(responseBody);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Logout failed: " + e.getMessage()));
+            Response responseBody = new Response("Logout failed", false).error(e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseBody);
         }
     }
 }

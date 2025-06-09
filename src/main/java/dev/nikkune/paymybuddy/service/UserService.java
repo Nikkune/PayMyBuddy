@@ -31,15 +31,6 @@ public class UserService implements IUserService {
     }
 
     /**
-     * Retrieves a list of all users in the system.
-     *
-     * @return a list of all users
-     */
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    /**
      * Retrieves a user by their ID and verifies that the user exists in the system.
      * If the user does not exist, a {@code RuntimeException} is thrown.
      *
@@ -50,21 +41,9 @@ public class UserService implements IUserService {
     public User requiredUser(int id) throws RuntimeException {
         User existingUser = userRepository.findById(id).orElse(null);
         if (existingUser == null)
-            throw new RuntimeException("User with ID : " + id + " does not exist");
+            throw new RuntimeException("User with ID : " + id + " not found");
 
         return existingUser;
-    }
-
-    /**
-     * Retrieves a User object by its unique identifier. If the user does not exist,
-     * a RuntimeException is thrown.
-     *
-     * @param id the unique identifier of the user to be retrieved
-     * @return the User object associated with the given ID
-     * @throws RuntimeException if no user is found with the provided ID
-     */
-    public User getUserById(int id) throws RuntimeException {
-        return requiredUser(id);
     }
 
     /**
@@ -79,7 +58,7 @@ public class UserService implements IUserService {
         if (existingUser != null) {
             return existingUser;
         } else {
-            throw new RuntimeException("User with email : " + email + " does not exist");
+            throw new RuntimeException("User with email : " + email + " not found");
         }
     }
 
@@ -123,45 +102,17 @@ public class UserService implements IUserService {
             existingUser.setUsername(user.getUsername());
         if (user.getEmail() != null)
             existingUser.setEmail(user.getEmail());
+        if (user.getPassword() != null) {
+            existingUser.setPassword(PasswordUtil.encodePassword(user.getPassword()));
+        }
 
         return userRepository.save(existingUser);
-    }
-
-    /**
-     * Updates the password of a user after validating the old password.
-     *
-     * @param userId the ID of the user whose password is being updated
-     * @param oldPassword the current password that needs to be validated
-     * @param newPassword the new password to be set for the user
-     * @return the updated {@code User} object with the new password
-     * @throws RuntimeException if the user does not exist, or if the old password does not match the current password
-     */
-    public User updatePassword(int userId, String oldPassword, String newPassword) throws RuntimeException {
-        User existingUser = requiredUser(userId);
-
-        if (!PasswordUtil.matches(oldPassword, existingUser.getPassword()))
-            throw new RuntimeException("Old password does not match");
-
-        String encodedPassword = PasswordUtil.encodePassword(newPassword);
-        existingUser.setPassword(encodedPassword);
-        return userRepository.save(existingUser);
-    }
-
-    /**
-     * Deletes a user with the specified ID if the user exists.
-     *
-     * @param userId the ID of the user to be deleted
-     * @throws RuntimeException if no user with the specified ID exists
-     */
-    public void deleteUser(int userId) throws RuntimeException {
-        User existingUser = requiredUser(userId);
-        userRepository.delete(existingUser);
     }
 
     /**
      * Authenticates a user by validating their email and password.
      *
-     * @param email the email of the user attempting to log in
+     * @param email    the email of the user attempting to log in
      * @param password the password of the user attempting to log in
      * @return true if the login is successful
      * @throws RuntimeException if the user does not exist or the provided password is invalid
@@ -169,7 +120,7 @@ public class UserService implements IUserService {
     public boolean login(String email, String password) throws RuntimeException {
         User existingUser = userRepository.findByEmail(email).orElse(null);
         if (existingUser == null)
-            throw new RuntimeException("User with email : " + email + " does not exist");
+            throw new RuntimeException("User with email : " + email + " not found");
         if (!PasswordUtil.matches(password, existingUser.getPassword()))
             throw new RuntimeException("Invalid password");
         return true;
@@ -193,34 +144,18 @@ public class UserService implements IUserService {
      * If the connection already exists, an exception is thrown.
      *
      * @param userId the ID of the user initiating the connection
-     * @param connectionId the ID of the user to whom the connection is being made
+     * @param email  the email of the user to whom the connection is being made
      * @return a list of connections for the user initiating the connection
      * @throws RuntimeException if any of the users do not exist or if the connection already exists
      */
-    public List<User> addConnection(int userId, int connectionId) throws RuntimeException {
+    public List<User> addConnection(int userId, String email) throws RuntimeException {
         User existingUser = requiredUser(userId);
-        User connection = requiredUser(connectionId);
+        User connection = userRepository.findByEmail(email).orElse(null);
+        if (connection == null)
+            throw new RuntimeException("User with email : " + email + " not found");
         if (existingUser.getConnections().contains(connection))
             throw new RuntimeException("User is already connected to this user");
         existingUser.getConnections().add(connection);
-        return existingUser.getConnections();
-    }
-
-    /**
-     * Removes a connection between two users based on their user IDs.
-     * If the connection does not exist, an exception is thrown.
-     *
-     * @param userId the ID of the user performing the removal
-     * @param connectionId the ID of the user to be removed from the connections
-     * @return a list of remaining connections for the user after the removal
-     * @throws RuntimeException if either user does not exist, or there is no existing connection between them
-     */
-    public List<User> removeConnection(int userId, int connectionId) throws RuntimeException {
-        User existingUser = requiredUser(userId);
-        User connection = requiredUser(connectionId);
-        if (!existingUser.getConnections().contains(connection))
-            throw new RuntimeException("User is not connected to this user");
-        existingUser.getConnections().remove(connection);
         return existingUser.getConnections();
     }
 }

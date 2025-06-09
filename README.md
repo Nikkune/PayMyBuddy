@@ -97,32 +97,6 @@ No parameters required. The user must be authenticated to access this endpoint.
 
 ### Users
 
-#### Get all
-
-```http
-  GET /users
-```
-
-#### Get
-
-```http
-  GET /users?userId={id}
-```
-
-| Parameter | Type  | Description                      |
-|-----------|-------|----------------------------------|
-| `id`      | `int` | **Required** Id of user to fetch |
-
-#### Get by email
-
-```http
-  GET /users/email?email={email}
-```
-
-| Parameter | Type     | Description                         |
-|-----------|----------|-------------------------------------|
-| `email`   | `string` | **Required** Email of user to fetch |
-
 #### Update
 
 ```http
@@ -134,28 +108,7 @@ No parameters required. The user must be authenticated to access this endpoint.
 | `id`       | `int`    | **Required** Id of user to update |
 | `username` | `string` | The new username of the user      |
 | `email`    | `string` | The new email of the user         |
-
-#### Update password
-
-```http
-  PUT /users/password
-```
-
-| Parameter     | Type     | Description                               |
-|---------------|----------|-------------------------------------------|
-| `id`          | `int`    | **Required** Id of user to update         |
-| `oldPassword` | `string` | **Required** The old password of the user |
-| `password`    | `string` | **Required** The new password of the user |
-
-#### Delete
-
-```http
-  DELETE /users?userId={id}
-```
-
-| Parameter | Type  | Description                       |
-|-----------|-------|-----------------------------------|
-| `id`      | `int` | **Required** Id of user to delete |
+| `password` | `string` | The new password of the user      |
 
 
 #### Get connections
@@ -174,55 +127,23 @@ No parameters required. The user must be authenticated to access this endpoint.
   POST /users/{id}/connections
 ```
 
-| Parameter      | Type  | Description                                            |
-|----------------|-------|--------------------------------------------------------|
-| `id`           | `int` | **Required** Id of user to get all of it's connections |
-| `connectionId` | `int` | **Required** Id of the user to add connections         |
-
-#### Delete connections
-
-```http
-  DELETE /users/{id}/connections
-```
-
-| Parameter      | Type  | Description                                            |
-|----------------|-------|--------------------------------------------------------|
-| `id`           | `int` | **Required** Id of user to get all of it's connections |
-| `connectionId` | `int` | **Required** Id of the user to remove connections      |
-
+| Parameter | Type     | Description                                            |
+|-----------|----------|--------------------------------------------------------|
+| `id`      | `int`    | **Required** Id of user to get all of it's connections |
+| `email`   | `string` | **Required** Email of the user to add connections      |
 
 ### Transactions
-
-#### Get
-
-```http
-  GET /transactions/id?transactionId={id}
-```
-
-| Parameter | Type  | Description                              |
-|-----------|-------|------------------------------------------|
-| `id`      | `int` | **Required** Id of transactions to fetch |
 
 #### Get user transactions
 
 ```http
-  GET /transactions/user?userId={id}
+  GET /transactions?userId={id}
 ```
 
 | Parameter | Type  | Description                                 |
 |-----------|-------|---------------------------------------------|
 | `id`      | `int` | **Required** Id of user to get transactions |
 
-#### Get transactions between users
-
-```http
-  GET /transactions?senderId={senderId}&receiverId={receiverId}
-```
-
-| Parameter    | Type  | Description                 |
-|--------------|-------|-----------------------------|
-| `senderId`   | `int` | **Required** Id of sender   |
-| `receiverId` | `int` | **Required** Id of receiver |
 
 #### Add transactions
 

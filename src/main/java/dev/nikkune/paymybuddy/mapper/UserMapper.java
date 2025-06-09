@@ -2,6 +2,7 @@ package dev.nikkune.paymybuddy.mapper;
 
 import dev.nikkune.paymybuddy.dto.UserDTO;
 import dev.nikkune.paymybuddy.dto.UserRegistrationDTO;
+import dev.nikkune.paymybuddy.dto.UserUpdateDTO;
 import dev.nikkune.paymybuddy.model.User;
 import org.mapstruct.*;
 
@@ -35,6 +36,14 @@ public interface UserMapper {
      * @return the User entity
      */
     User userRegistrationDTOToUser(UserRegistrationDTO userRegistrationDto);
+
+    /**
+     * Converts a UserUpdateDTO to a User entity.
+     *
+     * @param userUpdateDTO the UserUpdateDTO containing the updated user information
+     * @return the User entity updated with the given information
+     */
+    User userUpdateDTOToUser(UserUpdateDTO userUpdateDTO);
 
     /**
      * Maps the connections list to a list of IDs
