@@ -16,7 +16,6 @@ import java.util.List;
  * in a transactional context and verifies the existence of required users.
  */
 @Service
-@Transactional
 public class TransactionService implements ITransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
@@ -64,6 +63,7 @@ public class TransactionService implements ITransactionService {
      * @return the saved transaction object
      * @throws RuntimeException if the sender or receiver does not exist
      */
+    @Transactional
     public Transaction addTransaction(TransactionCreationDTO transactionCreationDTO) throws RuntimeException {
         User sender = userRepository.findById(transactionCreationDTO.getSenderId()).orElse(null);
         if (sender == null)

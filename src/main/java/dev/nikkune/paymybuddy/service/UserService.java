@@ -12,12 +12,8 @@ import java.util.List;
  * Service class responsible for user management and related operations.
  * This class manages the users in the system, including registration, login, updates,
  * and connections between users. It uses the {@link UserRepository} to perform database operations.
- * <p>
- * All methods are transactional, ensuring the integrity and consistency
- * of the operations performed on user data.
  */
 @Service
-@Transactional
 public class UserService implements IUserService {
     private final UserRepository userRepository;
 
@@ -70,6 +66,7 @@ public class UserService implements IUserService {
      * @return the registered User object after being persisted
      * @throws RuntimeException if the email or username is already in use
      */
+    @Transactional
     public User register(User user) throws RuntimeException {
         // Check if the email is already taken
         User existingUser = userRepository.findByEmail(user.getEmail()).orElse(null);
@@ -95,6 +92,7 @@ public class UserService implements IUserService {
      * @return the updated User object saved in the database.
      * @throws RuntimeException if the user with the given ID does not exist.
      */
+    @Transactional
     public User updateUser(User user) throws RuntimeException {
         User existingUser = requiredUser(user.getId());
         // Replace non-null fields
@@ -148,6 +146,7 @@ public class UserService implements IUserService {
      * @return a list of connections for the user initiating the connection
      * @throws RuntimeException if any of the users do not exist or if the connection already exists
      */
+    @Transactional
     public List<User> addConnection(int userId, String email) throws RuntimeException {
         User existingUser = requiredUser(userId);
         User connection = userRepository.findByEmail(email).orElse(null);
